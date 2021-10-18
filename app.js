@@ -1,14 +1,6 @@
+const { writeFile , copyFile } = require('.utils/generate-site.js');
 const inquirer = require('inquirer');
-// const fs = require('fs');
-// const generatePage = require('./src/page-template');
-
-// const pageHTML = generatePage(name, github);
-
-// fs.writeFile('./index.html', pageHTML, err => {
-//   if (err) throw err;
-
-//   console.log('protfolio complete!');
-// });
+const generatePage = require('./src/page-template');
 
 const promptUser = () => {
   return inquirer.prompt([
@@ -56,11 +48,11 @@ const promptUser = () => {
 const promptProject = portfolioData => {
   console.log(`
 =================
-Add New Project
+Add a New Project
 =================
 `);
 
-  // If there's no 'projects' array property, create one, important for err checking?
+  // If there's no 'projects' array property, create one
   if (!portfolioData.projects) {
     portfolioData.projects = [];
   }
@@ -69,7 +61,7 @@ Add New Project
       {
         type: 'input',
         name: 'name',
-        message: 'What is  name of ur project? (Required)',
+        message: 'What is the name of your project? (Required)',
         validate: nameInput => {
           if (nameInput) {
             return true;
@@ -134,48 +126,21 @@ Add New Project
     });
 };
 
-const promptUser = () => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'name',
-      message: 'What is your name? (Required)',
-      validate: nameInput => {
-        if (nameInput) {
-          return true;
-        } else {
-          console.log('Please enter your name!');
-          return false;
-        }
-      }
-    },
-    {
-      type: 'input',
-      name: 'github',
-      message: 'Enter your GitHub Username (Required)',
-      validate: githubInput => {
-        if (githubInput) {
-          return true;
-        } else {
-          console.log('Please enter your GitHub username!');
-          return false;
-        }
-      }
-    },
-    {
-      type: 'confirm',
-      name: 'confirmAbout',
-      message: 'Would you like to enter some infor about urself for an "About" section?',
-      default: true
-    },
-    {
-      type: 'input',
-      name: 'about',
-      message: 'Provide some info about yourself:',
-      when: ({ confirmAbout }) => confirmAbout
-    }
-  ]);
-};
 promptUser()
   .then(promptProject)
-  .then(projectData => console.log(projectData));
+  .then(portfolioData => {
+    return generatePage(portfolioData);
+  })
+  .then(pageHTML => {
+    return writeFile(pageHTML);
+  })
+  .then(writeFileResponse => {
+    console.log(writeFileResponse);
+    return copyFile();
+  })
+  .then(copyFileResponse => {
+    console.log(copyFileResponse);
+  })
+  .catch(err => {
+    console.log(err);
+  });
